@@ -1,0 +1,129 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  serverless todo app
+
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+    Description: "The environment to deploy to"
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Architectures:
+      - x86_64
+    MemorySize: 128
+    CodeUri: ./src
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref TodoTable
+
+Resources:
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Stage
+      Cors:
+        AllowMethods: "'GET,POST,PUT,DELETE'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+      
+  getTodos:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: getTodos.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TodoTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /
+            Method: GET
+            RestApiId: !Ref ApiGatewayApi
+
+  getTodo:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: getTodo.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TodoTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /{id}
+            Method: GET
+            RestApiId: !Ref ApiGatewayApi
+
+  createTodo:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: createTodo.handler
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref TodoTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /
+            Method: POST
+            RestApiId: !Ref ApiGatewayApi
+
+  deleteTodo: 
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: deleteTodo.handler
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:DeleteItem
+              Resource: !GetAtt TodoTable.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /{id}
+            Method: DELETE
+            RestApiId: !Ref ApiGatewayApi
+
+  editTodo:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: editTodo.handler
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref TodoTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /{id}
+            Method: PUT
+            RestApiId: !Ref ApiGatewayApi
+
+  TodoTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+
+Outputs:
+  WebEndpoint:
+    Description: "API Gateway endpoint URL for Prod stage"
+    # Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/"
+    Value: !Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/"

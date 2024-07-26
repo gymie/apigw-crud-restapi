@@ -1,0 +1,61 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css'
+        integrity='sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg=='
+        crossorigin='anonymous' />
+</head>
+
+<body>
+    <div class="container">
+        <div class="container mt-5">
+            <h1 class="text-center mb-4">To-Do List</h1>
+
+            <form id="todo-form">
+                <div class="mb-3">
+                    <label for="task" class="form-label">New Task</label>
+                    <input type="text" class="form-control" id="task" placeholder="Enter a task">
+                </div>
+                <button type="submit" class="btn btn-primary">Add Task</button>
+            </form>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">To-Do List</h5>
+                </div>
+                <div class="card-body">
+                    <!-- To-Do List -->
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Task 1
+                            <button class="btn btn-danger btn-sm">Delete</button>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Task 2
+                            <button class="btn btn-danger btn-sm">Delete</button>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Task 3
+                            <button class="btn btn-danger btn-sm">Delete</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.1/cdn.min.js'
+            integrity='sha512-ytM6hP1K9BkRTjUQZpxZKFjJ2TvE4QXaK7phVymsm7NimaI5H09TWWW6f2JMbonLp4ftYU6xfwQGoe3C8jta9A=='
+            crossorigin='anonymous'></script>
+        <script>
+            const api_url = "https://j4ijw3ciu0.execute-api.ap-southeast-1.amazonaws.com/prod/"
+            fetch(api_url)
+                .then(response => response.json())
+                .then(({ message }) => console.log(message))
+                .catch(error => console.log(error));
+        </script>
+</body>
+
+</html>

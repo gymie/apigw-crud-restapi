@@ -1,0 +1,103 @@
+app: todoapp
+
+service: todoapp
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  memorySize: 128
+  region: ${opt:region, 'ap-southeast-1'}
+  stage: ${opt:stage, 'dev'}
+  environment:
+    TABLE_NAME: Todos-${opt:stage, 'dev'}
+
+plugins:
+  - serverless-iam-roles-per-function 
+  
+resources:
+  Resources:
+    TodosDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+functions:
+  createTodo:
+    handler: src/createTodo.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: !GetAtt TodosDynamoDBTable.Arn
+    dependsOn:
+      - TodosDynamoDBTable
+    events:
+      - http:
+          path: /
+          method: post
+          cors: true
+  editTodo:
+    handler: src/editTodo.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+        Resource: !GetAtt TodosDynamoDBTable.Arn
+    dependsOn:
+      - TodosDynamoDBTable
+    events:
+      - http:
+          path: /{id}
+          method: put
+          cors: true
+  deleteTodo:
+    handler: src/deleteTodo.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:DeleteItem
+        Resource: !GetAtt TodosDynamoDBTable.Arn
+    dependsOn:
+      - TodosDynamoDBTable
+    events:
+      - http:
+          path: /{id}
+          method: delete
+          cors: true
+  getTodos:
+    handler: src/getTodos.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+        Resource: !GetAtt TodosDynamoDBTable.Arn
+    dependsOn:
+      - TodosDynamoDBTable
+    events:
+      - http:
+          path: /
+          method: get
+          cors: true
+  getTodo:
+    handler: src/getTodo.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: !GetAtt TodosDynamoDBTable.Arn
+    dependsOn:
+      - TodosDynamoDBTable
+    events:
+      - http:
+          path: /{id}
+          method: get
+          cors: true
+
+

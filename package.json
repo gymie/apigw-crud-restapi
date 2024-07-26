@@ -1,0 +1,21 @@
+{
+  "name": "apigw-crud-restapi",
+  "version": "0.1.0",
+  "bin": {
+    "apigw-crud-restapi": "bin/apigw-crud-restapi.js"
+  },
+  "scripts": {
+    "build": "echo \"The build step is not required when using JavaScript!\" && exit 0",
+    "cdk": "cdk",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "aws-cdk": "2.147.3",
+    "jest": "^29.7.0",
+    "serverless-iam-roles-per-function": "^3.2.0"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.147.3",
+    "constructs": "^10.0.0"
+  }
+}
